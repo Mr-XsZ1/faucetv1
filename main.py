@@ -141,7 +141,7 @@ class Bot:
         
         while True:
             sleep(2)
-            self.wait(600)
+            self.wait(630)
             claim_faucet()
 
     def write_file(self, data):
