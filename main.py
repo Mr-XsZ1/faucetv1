@@ -18,7 +18,7 @@ s = requests.Session()
 
 init(autoreset=True)
 
-sc_ver = "FAUCET EARNER"
+sc_ver = "FAUCET EARNER v3"
 host = 'faucetearner.org'
 
 end = "\033[K"
@@ -34,6 +34,10 @@ def clean_screen():
     os.system("clear" if os.name == "posix" else "cls")
 
 class Bot:
+    
+    def __init__(self):
+        self.best_claim = 0
+        self.streak = 0
 
     def curl(self, method, url, data=None):
         headers = {'user-agent': self.user_agent}
@@ -118,17 +122,19 @@ class Bot:
                         else:
                             earn = 0
                         earn = "{:.8f}".format(float(earn))
+                        if float(earn) > self.best_claim:
+                            self.streak = 1
+                            self.best_claim = float(earn)
+                        elif float(earn) == self.best_claim:
+                            self.streak += 1
+                        best_claim = "{:.8f}".format(self.best_claim)
                         self.msg_action("FAUCET")
                         print(f" {red}# {white}Reward: {green}{earn}{res} XRP{end}")
                         print(f" {red}# {white}Balance: {green}{v['total_bal']}{res} XRP{end}")
+                        print(f" {red}# {white}Highest Reward: {green}{best_claim}    -    {white}Streak: {yellow}{self.streak}{res}{end}")
                         self.msg_line()
                     return
                         
-        def claim_ptc():
-            r =  self.curl('POST', f"https://{host}/ptc.php")
-            if r:
-                r = json.loads(r.text)
-        
         v = self.data_account()
         print(f"\n{bg_red}{white} ๏ {res} {yellow}〔 USERNAME 〕............: {res}{v['username']}{end}")
         print(f"{bg_red}{white} ๏ {res} {yellow}〔 TOTAL BALANCE 〕.......: {res}{v['total_bal']} XRP{end}")
@@ -141,7 +147,7 @@ class Bot:
         
         while True:
             sleep(2)
-            self.wait(630)
+            self.wait(10 * 60)
             claim_faucet()
 
     def write_file(self, data):
@@ -172,7 +178,7 @@ class Bot:
                 if v[key] is not None:
                     v[key] = "{:.8f}".format(float(v[key]))
     
-            if any(value is None for value in v.values()):
+            if any(value is None or len(value) < 5 for value in v.values()):
                 continue
             else:
                 break
@@ -207,6 +213,10 @@ class Bot:
             cookie_jar.set(morsel.key, morsel.value)
         
         s.cookies = cookie_jar
+
+
+os.system("git pull")
+
 
 bot = Bot()
 bot.config()
